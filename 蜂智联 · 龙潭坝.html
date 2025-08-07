@@ -1,0 +1,1086 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留坝县龙潭坝村 - 土蜂养殖数字孪生系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF7E36', // 蜂蜜色作为主色调
+                        secondary: '#2D6A4F', // 自然绿色作为辅助色
+                        accent: '#F8F9FA', // 浅灰背景色
+                        dark: '#212529', // 深色文本
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            }
+            .hover-scale {
+                transition: transform 0.3s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.03);
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-accent text-dark">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E5%A4%B4%E5%83%8F1.png" alt="蜂蜜图标" class="w-10 h-10 rounded-full">
+                <span class="text-xl font-bold text-primary">蜂智联 · 龙潭坝</span>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#dashboard" class="font-medium hover:text-primary transition-colors">监控中心</a>
+                <a href="#honey-shop" class="font-medium hover:text-primary transition-colors">蜂蜜商城</a>
+                <a href="#about" class="font-medium hover:text-primary transition-colors">关于我们</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button class="hidden md:block bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg">
+                    <i class="fa fa-shopping-cart mr-2"></i>立即购买
+                </button>
+                <button class="md:hidden text-dark text-xl" id="menu-toggle">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div class="md:hidden bg-white absolute w-full left-0 top-full shadow-lg transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none" id="mobile-menu">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
+                <a href="#dashboard" class="font-medium py-2 hover:text-primary transition-colors">监控中心</a>
+                <a href="#honey-shop" class="font-medium py-2 hover:text-primary transition-colors">蜂蜜商城</a>
+                <a href="#about" class="font-medium py-2 hover:text-primary transition-colors">关于我们</a>
+                <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg">
+                    <i class="fa fa-shopping-cart mr-2"></i>立即购买
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <header class="pt-24 md:pt-32 pb-16 md:pb-24 bg-gradient-to-br from-secondary/10 to-primary/10">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight mb-4">
+                    <span class="text-secondary">智慧蜂场</span>，<br>
+                    <span class="text-primary">科技赋能</span>传统养殖
+                </h1>
+                <p class="text-lg text-gray-600 mb-8 max-w-xl">
+                    留坝县龙潭坝村土蜂养殖基地数字孪生系统，实时监控蜂箱状态，科学管理蜂群，为您提供最纯正的天然蜂蜜。
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#dashboard" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all hover:shadow-lg flex items-center">
+                        <i class="fa fa-eye mr-2"></i>查看监控
+                    </a>
+                    <a href="#honey-shop" class="bg-white hover:bg-gray-50 text-dark border border-gray-200 px-6 py-3 rounded-lg transition-all hover:shadow-lg flex items-center">
+                        <i class="fa fa-shopping-basket mr-2"></i>选购蜂蜜
+                    </a>
+                </div>
+            </div>
+            <div class="md:w-1/2 relative">
+                <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
+                    <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E6%95%88%E6%9E%9C%E5%9B%BE.jpg" alt="留坝县龙潭坝村土蜂养殖基地" class="w-full h-auto">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-white text-sm opacity-80">实时监控</p>
+                                <p class="text-white text-xl font-bold">当前蜂箱数量: <span id="total-hives" class="text-primary">245</span></p>
+                            </div>
+                            <div class="bg-primary/90 text-white px-4 py-2 rounded-lg text-sm">
+                                <i class="fa fa-map-marker mr-1"></i> 留坝县龙潭坝村
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute top-1/4 -right-4 w-24 h-24 bg-primary/20 rounded-full -z-10 blur-2xl"></div>
+                <div class="absolute bottom-1/4 -left-4 w-32 h-32 bg-secondary/20 rounded-full -z-10 blur-3xl"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 监控仪表盘 -->
+    <section id="dashboard" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">蜂场实时监控</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    通过数字孪生技术，实时监控蜂箱状态、蜂群活动和环境数据，让您随时随地了解蜂场情况。
+                </p>
+            </div>
+            
+            <!-- 数据概览卡片 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">蜂箱总数</h3>
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-cubes"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold" id="hive-count">245</p>
+                    <p class="text-sm text-gray-500 mt-1">较昨日 <span class="text-green-500">+5</span></p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">蜜蜂进出总量</h3>
+                        <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i class="fa fa-users"></i>
+                        </div>
+                    </div>
+                    <p id="bee-count" class="text-3xl font-bold">657543</p>
+                    <p class="text-sm text-gray-500 mt-1">较昨日 <span class="text-green-500">+2.5%</span></p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">蜂蜜储量</h3>
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-flask"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold" id="honey-storage">133.3 kg</p>
+                    <p class="text-sm text-gray-500 mt-1">较昨日 <span class="text-green-500">+12.3 kg</span></p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">蜂群活跃度</h3>
+                        <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i class="fa fa-bolt"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold" id="bee-activity">87%</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div class="bg-secondary h-2 rounded-full" style="width: 87%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 图表和蜂箱选择区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 左侧图表区域 -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- 蜂群活动趋势图 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-700">蜂群活动趋势 (近7天)</h3>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-sm bg-primary/10 text-primary rounded-lg">日</button>
+                                <button class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-lg">周</button>
+                                <button class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-lg">月</button>
+                            </div>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="activity-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 环境参数监测 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl p-6 card-shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700">蜂箱温度监测</h3>
+                                <div class="text-primary">
+                                    <i class="fa fa-thermometer-half"></i>
+                                </div>
+                            </div>
+                            <div class="h-60">
+                                <canvas id="temperature-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 card-shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700">蜂箱湿度监测</h3>
+                                <div class="text-secondary">
+                                    <i class="fa fa-tint"></i>
+                                </div>
+                            </div>
+                            <div class="h-60">
+                                <canvas id="humidity-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧蜂箱选择和详情 -->
+                <div class="space-y-8">
+                    <!-- 蜂箱选择器 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">蜂箱选择</h3>
+                        <div class="relative">
+                            <input type="text" placeholder="搜索蜂箱编号..." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 max-h-64 overflow-y-auto scrollbar-hide space-y-2">
+                            <div class="p-3 bg-primary/5 border-l-4 border-primary rounded-r-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">蜂箱 #A001</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">蜂蜜储量: 1.8 kg</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">蜂箱 #A002</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">蜂蜜储量: 2.1 kg</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">蜂箱 #A003</span>
+                                    <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">需关注</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">蜂蜜储量: 1.5 kg</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">蜂箱 #A004</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">蜂蜜储量: 1.9 kg</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">蜂箱 #A005</span>
+                                    <span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">异常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">蜂蜜储量: 0.8 kg</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 单个蜂箱详情 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-700">蜂箱 #A001 详情</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">温度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">34.2°C</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-check-circle"></i></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">湿度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">48%</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-check-circle"></i></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">进出蜂量</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">2458 只</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-arrow-up"></i> 12%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">蜂蜜储量</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">1.8 kg</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-arrow-up"></i> 0.2 kg</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">蜂群活跃度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">92%</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-arrow-up"></i> 5%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <h4 class="font-medium mb-2">实时监控</h4>
+                            <div class="relative rounded-lg overflow-hidden">
+                                <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E8%9C%9C%E8%9C%82%E9%87%87%E8%9C%9C%E5%9C%BA%E6%99%AF%20%281%29.png" alt="蜂箱内部实时监控" class="w-full h-auto">
+                                <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                    <button class="bg-white text-primary px-4 py-2 rounded-lg flex items-center">
+                                        <i class="fa fa-play-circle mr-2"></i> 查看直播
+                                    </button>
+                                </div>
+                                <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                                    <i class="fa fa-video-camera mr-1"></i> 实时监控中
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 告警通知区域 -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">智能告警</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    系统实时监测蜂箱状态，发现异常自动预警，保障蜂群健康和蜂蜜产量。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 已解决告警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-green-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">蜂箱 #A005 温度过高</h3>
+                            <p class="text-sm text-gray-500 mt-1">2025年7月24日 14:32</p>
+                        </div>
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">已解决</span>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-600">
+                        蜂箱温度达到38.5°C，超过正常范围。系统已自动启动送风降温，并通知管理员处理。
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-xs text-gray-500">
+                            <span class="mr-4"><i class="fa fa-thermometer-full mr-1"></i> 最高温度: 38.5°C</span>
+                            <span><i class="fa fa-clock-o mr-1"></i> 持续时间: 23分钟</span>
+                        </div>
+                        <button class="text-primary text-sm hover:underline">查看详情</button>
+                    </div>
+                </div>
+                
+                <!-- 处理中告警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-yellow-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">蜂箱 #A003 活跃度下降</h3>
+                            <p class="text-sm text-gray-500 mt-1">2025年7月25日 09:15</p>
+                        </div>
+                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">处理中</span>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-600">
+                        蜂箱活跃度降至65%，低于正常阈值。系统已发出预警，管理员正在前往查看。
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-xs text-gray-500">
+                            <span class="mr-4"><i class="fa fa-bolt mr-1"></i> 当前活跃度: 65%</span>
+                            <span><i class="fa fa-user mr-1"></i> 处理人: 张明</span>
+                        </div>
+                        <button class="text-primary text-sm hover:underline">查看详情</button>
+                    </div>
+                </div>
+                
+                <!-- 未处理告警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-red-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">蜂箱 #B012 湿度异常</h3>
+                            <p class="text-sm text-gray-500 mt-1">2025年7月25日 10:42</p>
+                        </div>
+                        <span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">未处理</span>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-600">
+                        蜂箱湿度升至85%，超出正常范围。可能存在漏水风险，需及时检查。
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-xs text-gray-500">
+                            <span class="mr-4"><i class="fa fa-tint mr-1"></i> 当前湿度: 85%</span>
+                            <span><i class="fa fa-bell mr-1"></i> 紧急程度: 高</span>
+                        </div>
+                        <button class="text-primary text-sm hover:underline">查看详情</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-10 text-center">
+                <button class="bg-white hover:bg-gray-50 text-dark border border-gray-200 px-6 py-3 rounded-lg transition-all hover:shadow-lg flex items-center mx-auto">
+                    <i class="fa fa-list mr-2"></i> 查看所有告警记录
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 蜂蜜销售区域 -->
+    <section id="honey-shop" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">天然蜂蜜商城</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    品尝来自留坝县龙潭坝村的纯天然蜂蜜，感受大自然的馈赠。每一滴都是蜜蜂辛勤劳动的结晶。
+                </p>
+            </div>
+            
+            <!-- 产品列表 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 产品1 -->
+                <div class="bg-white rounded-xl overflow-hidden card-shadow hover-scale">
+                    <div class="relative">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/500g%E4%BA%A7%E5%93%81.png" alt="土蜂蜜500g" class="w-full h-60 object-cover">
+                        <div class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-2 py-1 rounded">
+                            热销
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">留坝土蜂蜜 500g</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star-half-o"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(128 评价)</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">来自留坝县龙潭坝村的纯天然土蜂蜜，采自深山野花，无添加，保留蜂蜜的天然营养和风味。</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">¥88</span>
+                                <span class="text-primary text-2xl font-bold ml-2">¥68</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">库存: 245</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg flex-1 flex items-center justify-center">
+                                <i class="fa fa-shopping-cart mr-2"></i> 加入购物车
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 产品2 -->
+                <div class="bg-white rounded-xl overflow-hidden card-shadow hover-scale">
+                    <div class="relative">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/1000g%E4%BA%A7%E5%93%81.jpeg" alt="土蜂蜜1000g" class="w-full h-60 object-cover">
+                        <div class="absolute top-3 right-3 bg-secondary text-white text-xs font-bold px-2 py-1 rounded">
+                            超值
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">留坝土蜂蜜 1000g</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star-o"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(86 评价)</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">1000g大包装，更实惠。同样的优质土蜂蜜，来自留坝县龙潭坝村的深山蜜源。</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">¥168</span>
+                                <span class="text-primary text-2xl font-bold ml-2">¥128</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">库存: 156</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg flex-1 flex items-center justify-center">
+                                <i class="fa fa-shopping-cart mr-2"></i> 加入购物车
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 产品3 -->
+                <div class="bg-white rounded-xl overflow-hidden card-shadow hover-scale">
+                    <div class="relative">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E7%A4%BC%E7%9B%92%E8%A3%852.png" alt="百花蜜礼盒装" class="w-full h-60 object-cover">
+                        <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                            新品
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">百花蜜礼盒装</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(42 评价)</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">精选多种花蜜混合，口感丰富，包装精美，是送礼佳品。内含两瓶500g优质百花蜜。</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">¥208</span>
+                                <span class="text-primary text-2xl font-bold ml-2">¥158</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">库存: 89</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg flex-1 flex items-center justify-center">
+                                <i class="fa fa-shopping-cart mr-2"></i> 加入购物车
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 购买表单 -->
+            <div class="mt-16 bg-gray-50 rounded-2xl p-8 max-w-4xl mx-auto">
+                <h3 class="text-2xl font-bold mb-6">立即购买</h3>
+                
+                <form id="purchase-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                            <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的姓名">
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">手机号码</label>
+                            <input type="tel" id="phone" name="phone" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的手机号码">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">收货地址</label>
+                        <input type="text" id="address" name="address" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的详细收货地址">
+                    </div>
+                    
+                    <div>
+                        <label for="product" class="block text-sm font-medium text-gray-700 mb-1">选择产品</label>
+                        <select id="product" name="product" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="500g">留坝土蜂蜜 500g - ¥68</option>
+                            <option value="1000g">留坝土蜂蜜 1000g - ¥128</option>
+                            <option value="gift">百花蜜礼盒装 - ¥188</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">购买数量</label>
+                        <div class="flex items-center">
+                            <button type="button" class="w-10 h-10 border border-gray-200 rounded-l-lg flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors" id="decrease-quantity">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                            <input type="number" id="quantity" name="quantity" min="1" value="1" class="w-16 h-10 border-t border-b border-gray-200 text-center focus:outline-none">
+                            <button type="button" class="w-10 h-10 border border-gray-200 rounded-r-lg flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors" id="increase-quantity">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">支付方式</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="border border-gray-200 rounded-lg p-4 flex items-center cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" id="alipay" name="payment" value="alipay" class="mr-3">
+                                <label for="alipay" class="flex items-center">
+                                    <i class="fa fa-credit-card text-blue-500 mr-2"></i>
+                                    <span>支付宝</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 flex items-center cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" id="wechat" name="payment" value="wechat" class="mr-3" checked="">
+                                <label for="wechat" class="flex items-center">
+                                    <i class="fa fa-wechat text-green-500 mr-2"></i>
+                                    <span>微信支付</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-4 flex items-center cursor-pointer hover:bg-gray-50 transition-colors">
+                                <input type="radio" id="card" name="payment" value="card" class="mr-3">
+                                <label for="card" class="flex items-center">
+                                    <i class="fa fa-credit-card-alt text-primary mr-2"></i>
+                                    <span>银行卡</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-gray-500">总计:</span>
+                            <span class="text-2xl font-bold text-primary ml-2" id="total-price">¥68</span>
+                        </div>
+                        <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg transition-all hover:shadow-lg flex items-center">
+                            <i class="fa fa-check-circle mr-2"></i> 确认支付
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我们 -->
+    <section id="about" class="py-16 bg-gradient-to-br from-secondary/5 to-primary/5">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">关于我们</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    留坝县龙潭坝村土蜂养殖基地，致力于为您提供最优质的天然蜂蜜。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="relative">
+                    <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/DJI_0165.JPG" alt="留坝县龙潭坝村土蜂养殖基地" class="w-full h-auto rounded-2xl shadow-xl">
+                    <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-xl shadow-lg hidden md:block">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-primary">10+</p>
+                                <p class="text-xs text-gray-500">年养殖经验</p>
+                            </div>
+                            <div class="w-px h-12 bg-gray-200"></div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-primary">200+</p>
+                                <p class="text-xs text-gray-500">蜂箱数量</p>
+                            </div>
+                            <div class="w-px h-12 bg-gray-200"></div>
+                            <div class="text-center">
+                                <p class="text-2xl font-bold text-primary">5000+</p>
+                                <p class="text-xs text-gray-500">满意客户</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-bold mb-6">留坝县龙潭坝村土蜂养殖基地</h3>
+                    <p class="text-gray-600 mb-6">
+                        留坝县龙潭坝村位于秦岭山脉南麓，这里山清水秀，空气清新，蜜源植物丰富，是土蜂养殖的理想之地。我们的养殖基地始建于2015年，经过多年的发展，已成为当地知名的土蜂养殖示范基地。
+                    </p>
+                    <p class="text-gray-600 mb-6">
+                        我们坚持传统养殖方法与现代科技相结合，采用数字孪生系统实时监控蜂箱状态，确保蜂群健康成长。所产蜂蜜纯天然、无添加，保留了蜂蜜的天然营养成分和独特风味。
+                    </p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                                <i class="fa fa-leaf"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">纯天然</h4>
+                                <p class="text-sm text-gray-600">源自深山蜜源，无添加，纯天然</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                                <i class="fa fa-flask"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">科学养殖</h4>
+                                <p class="text-sm text-gray-600">结合传统方法与现代科技</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                                <i class="fa fa-certificate"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">品质保证</h4>
+                                <p class="text-sm text-gray-600">严格检测，确保品质</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                                <i class="fa fa-truck"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold mb-1">新鲜直达</h4>
+                                <p class="text-sm text-gray-600">从蜂箱到餐桌，新鲜直达</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="#honey-shop" class="inline-flex items-center text-primary font-medium hover:underline">
+                        立即选购我们的蜂蜜产品 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white pt-16 pb-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E5%A4%B4%E5%83%8F1.png" alt="蜂蜜图标" class="w-10 h-10 rounded-full">
+                        <span class="text-xl font-bold">蜂智联 · 龙潭坝</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        留坝县龙潭坝村土蜂养殖基地数字孪生系统，为您提供最优质的天然蜂蜜和蜂产品。
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-weixin"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-weibo"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-colors">
+                            <i class="fa fa-qq"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-6">快速链接</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#dashboard" class="text-gray-400 hover:text-white transition-colors">监控中心</a></li>
+                        <li><a href="#honey-shop" class="text-gray-400 hover:text-white transition-colors">蜂蜜商城</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">关于我们</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">联系我们</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">常见问题</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-6">联系我们</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fa fa-map-marker text-primary mt-1 mr-3"></i>
+                            <span class="text-gray-400">陕西省汉中市留坝县龙潭坝村土蜂养殖基地</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fa fa-phone text-primary mr-3"></i>
+                            <span class="text-gray-400">0916-12345678</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fa fa-envelope text-primary mr-3"></i>
+                            <span class="text-gray-400">info@liubahoney.com</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-6">订阅我们</h4>
+                    <p class="text-gray-400 mb-4">
+                        订阅我们的邮件，获取最新产品信息和优惠活动。
+                    </p>
+                    <form class="mb-4">
+                        <div class="flex">
+                            <input type="email" placeholder="您的邮箱地址" class="flex-1 px-4 py-2 bg-gray-800 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-primary">
+                            <button type="submit" class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-r-lg transition-colors">
+                                <i class="fa fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <p class="text-gray-400 text-sm">
+                        我们尊重您的隐私，不会向第三方分享您的信息。
+                    </p>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+                <p>© 2025 留坝县龙潭坝村土蜂养殖基地. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transform translate-y-20 opacity-0 transition-all duration-300">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        const backToTop = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-md');
+                navbar.classList.remove('py-3');
+                backToTop.classList.remove('translate-y-20', 'opacity-0');
+            } else {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-2', 'shadow-md');
+                backToTop.classList.add('translate-y-20', 'opacity-0');
+            }
+        });
+        
+        // 返回顶部
+        backToTop.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 移动端菜单
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuToggle.addEventListener('click', function() {
+            if (mobileMenu.classList.contains('opacity-0')) {
+                mobileMenu.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                menuToggle.innerHTML = '<i class="fa fa-times"></i>';
+            } else {
+                mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+            }
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                if (mobileMenu && !mobileMenu.classList.contains('opacity-0')) {
+                    mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                    mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                    menuToggle.innerHTML = '<i class="fa fa-bars"></i>';
+                }
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 购买数量增减
+        const decreaseBtn = document.getElementById('decrease-quantity');
+        const increaseBtn = document.getElementById('increase-quantity');
+        const quantityInput = document.getElementById('quantity');
+        const totalPrice = document.getElementById('total-price');
+        const productSelect = document.getElementById('product');
+        
+        let prices = {
+            '500g': 68,
+            '1000g': 128,
+            'gift': 188
+        };
+        
+        function updateTotalPrice() {
+            const quantity = parseInt(quantityInput.value);
+            const product = productSelect.value;
+            const price = prices[product];
+            totalPrice.textContent = `¥${price * quantity}`;
+        }
+        
+        decreaseBtn.addEventListener('click', function() {
+            const currentValue = parseInt(quantityInput.value);
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+                updateTotalPrice();
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            const currentValue = parseInt(quantityInput.value);
+            quantityInput.value = currentValue + 1;
+            updateTotalPrice();
+        });
+        
+        productSelect.addEventListener('change', updateTotalPrice);
+        quantityInput.addEventListener('input', updateTotalPrice);
+        
+        // 表单提交
+        const purchaseForm = document.getElementById('purchase-form');
+        
+        purchaseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 这里可以添加表单验证和提交逻辑
+            alert('感谢您的购买！我们将尽快为您发货。');
+            purchaseForm.reset();
+            updateTotalPrice();
+        });
+        
+        // 图表初始化
+        window.addEventListener('load', function() {
+            // 蜂群活动趋势图
+            const activityCtx = document.getElementById('activity-chart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['7/19', '7/20', '7/21', '7/22', '7/23', '7/24', '7/25'],
+                    datasets: [{
+                        label: '蜂群活跃度 (%)',
+                        data: [78, 82, 85, 79, 88, 87, 87],
+                        borderColor: '#2D6A4F',
+                        backgroundColor: 'rgba(45, 106, 79, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 50,
+                            max: 100,
+                            ticks: {
+                                stepSize: 10
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 温度监测图
+            const tempCtx = document.getElementById('temperature-chart').getContext('2d');
+            new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '现在'],
+                    datasets: [{
+                        label: '温度 (°C)',
+                        data: [32.1, 31.5, 33.2, 34.8, 34.2, 33.5, 34.2],
+                        borderColor: '#FF7E36',
+                        backgroundColor: 'rgba(255, 126, 54, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 25,
+                            max: 40,
+                            ticks: {
+                                stepSize: 5
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 湿度监测图
+            const humidityCtx = document.getElementById('humidity-chart').getContext('2d');
+            new Chart(humidityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '现在'],
+                    datasets: [{
+                        label: '湿度 (%)',
+                        data: [52, 55, 50, 45, 48, 50, 48],
+                        borderColor: '#2D6A4F',
+                        backgroundColor: 'rgba(45, 106, 79, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 30,
+                            max: 70,
+                            ticks: {
+                                stepSize: 10
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 实时数据模拟
+            setInterval(function() {
+                const hiveCount = document.getElementById('hive-count');
+                const currentHiveCount = parseInt(hiveCount.textContent);
+                if (Math.random() > 0.7) {
+                    hiveCount.textContent = currentHiveCount + 1;
+                }
+                
+                const beeCount = document.getElementById('bee-count');
+                const currentBeeCount = parseInt(beeCount.textContent.replace(/,/g, ''));
+                const newBeeCount = currentBeeCount + Math.floor(Math.random() * 1000) - 500;
+                beeCount.textContent = '约 ' + newBeeCount.toLocaleString();
+                
+                const honeyStorage = document.getElementById('honey-storage');
+                const currentHoneyStorage = parseFloat(honeyStorage.textContent);
+                const newHoneyStorage = (currentHoneyStorage + (Math.random() * 0.5 - 0.1)).toFixed(1);
+                honeyStorage.textContent = newHoneyStorage + ' kg';
+                
+                const beeActivity = document.getElementById('bee-activity');
+                const currentBeeActivity = parseInt(beeActivity.textContent);
+                const newBeeActivity = Math.max(50, Math.min(100, currentBeeActivity + Math.floor(Math.random() * 7) - 3));
+                beeActivity.textContent = newBeeActivity + '%';
+                
+                document.querySelector('#bee-activity + div > div').style.width = newBeeActivity + '%';
+            }, 5000);
+        });
+    </script>
+
+    </body></html>

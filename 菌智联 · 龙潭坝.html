@@ -1,0 +1,1035 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菇香园 - 花菇养殖数字孪生系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    
+    <!-- Tailwind配置 - 调整为浅绿色主基调 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4CAF50', // 浅绿色作为主色调（代表生长）
+                        secondary: '#8D6E63', // 木色作为辅助色（代表培养基）
+                        accent: '#F5F5F5', // 浅灰背景色
+                        dark: '#263238', // 深色文本
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            }
+            .hover-scale {
+                transition: transform 0.3s ease;
+            }
+            .hover-scale:hover {
+                transform: scale(1.03);
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-accent text-dark">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E5%A4%B4%E5%83%8F2.png" alt="花菇图标" class="w-10 h-10 rounded-full">
+                <span class="text-xl font-bold text-primary">菌智联 · 龙潭坝</span>
+            </div>
+            
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#dashboard" class="font-medium hover:text-primary transition-colors">监控中心</a>
+                <a href="#mushroom-shop" class="font-medium hover:text-primary transition-colors">花菇商城</a>
+                <a href="#about" class="font-medium hover:text-primary transition-colors">关于我们</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button class="hidden md:block bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg">
+                    <i class="fa fa-shopping-cart mr-2"></i>立即购买
+                </button>
+                <button class="md:hidden text-dark text-xl" id="menu-toggle">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div class="md:hidden bg-white absolute w-full left-0 top-full shadow-lg transform -translate-y-full opacity-0 transition-all duration-300 pointer-events-none" id="mobile-menu">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
+                <a href="#dashboard" class="font-medium py-2 hover:text-primary transition-colors">监控中心</a>
+                <a href="#mushroom-shop" class="font-medium py-2 hover:text-primary transition-colors">花菇商城</a>
+                <a href="#about" class="font-medium py-2 hover:text-primary transition-colors">关于我们</a>
+                <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg">
+                    <i class="fa fa-shopping-cart mr-2"></i>立即购买
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <header class="pt-24 md:pt-32 pb-16 md:pb-24 bg-gradient-to-br from-secondary/10 to-primary/10">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight mb-4">
+                    <span class="text-primary">智慧菌房</span>，<br>
+                    <span class="text-secondary">科学培育</span>优质花菇
+                </h1>
+                <p class="text-lg text-gray-600 mb-8 max-w-xl">
+                    菇香园花菇养殖基地数字孪生系统，实时监控培养环境，智能调节生长参数，为您提供最优质的天然花菇。
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#dashboard" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all hover:shadow-lg flex items-center">
+                        <i class="fa fa-eye mr-2"></i>查看监控
+                    </a>
+                    <a href="#mushroom-shop" class="bg-white hover:bg-gray-50 text-dark border border-gray-200 px-6 py-3 rounded-lg transition-all hover:shadow-lg flex items-center">
+                        <i class="fa fa-shopping-basket mr-2"></i>选购花菇
+                    </a>
+                </div>
+            </div>
+            <div class="md:w-1/2 relative">
+                <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
+                    <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E5%B0%81%E9%9D%A2.jpeg" alt="菇香园花菇养殖基地" class="w-full h-auto">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-white text-sm opacity-80">实时监控</p>
+                                <p class="text-white text-xl font-bold">当前大棚数量: <span id="total-rooms" class="text-primary">76</span></p>
+                            </div>
+                            <div class="bg-primary/90 text-white px-4 py-2 rounded-lg text-sm">
+                                <i class="fa fa-map-marker mr-1"></i> 花菇基地
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute top-1/4 -right-4 w-24 h-24 bg-primary/20 rounded-full -z-10 blur-2xl"></div>
+                <div class="absolute bottom-1/4 -left-4 w-32 h-32 bg-secondary/20 rounded-full -z-10 blur-3xl"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 监控仪表盘 -->
+    <section id="dashboard" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">菌房实时监控</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    通过数字孪生技术，实时监控培养室环境参数、花菇生长状态和设备运行情况，让您随时随地了解基地情况。
+                </p>
+            </div>
+            
+            <!-- 数据概览卡片 - 按要求修改为四个部分 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">培养室总数</h3>
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-cubes"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold" id="room-count">76</p>
+                    <p class="text-sm text-gray-500 mt-1">较上月 <span class="text-green-500">+2</span></p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">菌棒总数</h3>
+                        <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i class="fa fa-cube"></i>
+                        </div>
+                    </div>
+                    <p id="species-count" class="text-3xl font-bold">163248</p>
+                    <p class="text-sm text-gray-500 mt-1">单个大棚可培养2000个菌棒</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">日产鲜菇量</h3>
+                        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fa fa-balance-scale"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold" id="daily-output">4,800 kg</p>
+                    <p class="text-sm text-gray-500 mt-1">较昨日 <span class="text-green-500">+120 kg</span></p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow hover-scale">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-700">日产干菇量</h3>
+                        <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+                            <i class="fa fa-fire"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold" id="equipment-rate">350 kg</p>
+                    <p class="text-sm text-gray-500 mt-1">出干率约 <span class="font-medium">10%</span></p>
+                </div>
+            </div>
+            
+            <!-- 图表和培养室选择区域 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- 左侧图表区域 -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- 生长趋势图 - 调整为符合花菇生长特点 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-700">花菇生长趋势 (近30天)</h3>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-sm bg-primary/10 text-primary rounded-lg">日</button>
+                                <button class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-lg">周</button>
+                                <button class="px-3 py-1 text-sm bg-gray-100 text-gray-600 rounded-lg">月</button>
+                            </div>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="growth-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 环境参数监测 - 调整为符合花菇生长环境特点 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl p-6 card-shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700">培养室温度监测</h3>
+                                <div class="text-primary">
+                                    <i class="fa fa-thermometer-half"></i>
+                                </div>
+                            </div>
+                            <div class="h-60">
+                                <canvas id="temperature-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 card-shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700">培养室湿度监测</h3>
+                                <div class="text-secondary">
+                                    <i class="fa fa-tint"></i>
+                                </div>
+                            </div>
+                            <div class="h-60">
+                                <canvas id="humidity-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- CO2浓度和光照强度 - 调整为符合花菇生长环境特点 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl p-6 card-shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700">CO₂浓度监测</h3>
+                                <div class="text-primary">
+                                    <i class="fa fa-cloud"></i>
+                                </div>
+                            </div>
+                            <div class="h-60">
+                                <canvas id="co2-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 card-shadow">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-semibold text-gray-700">光照强度监测</h3>
+                                <div class="text-secondary">
+                                    <i class="fa fa-lightbulb-o"></i>
+                                </div>
+                            </div>
+                            <div class="h-60">
+                                <canvas id="light-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧培养室选择和详情 - 统一为花菇 -->
+                <div class="space-y-8">
+                    <!-- 培养室选择器 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">大棚选择</h3>
+                        <div class="relative">
+                            <input type="text" placeholder="搜索大棚编号..." class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 max-h-64 overflow-y-auto scrollbar-hide space-y-2">
+                            <div class="p-3 bg-primary/5 border-l-4 border-primary rounded-r-lg cursor-pointer hover:bg-primary/10 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">大棚 #G001</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">品种: 花菇 | 生长阶段: 成熟期</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">大棚 #G002</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">品种: 花菇 | 生长阶段: 生长期</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">大棚 #G003</span>
+                                    <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">需关注</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">品种: 花菇 | 生长阶段: 初期</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">大棚 #G004</span>
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">品种: 花菇 | 生长阶段: 中期</p>
+                            </div>
+                            
+                            <div class="p-3 bg-white border-l-4 border-secondary rounded-r-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-medium">大棚 #G005</span>
+                                    <span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">异常</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">品种: 花菇 | 生长阶段: 生长期</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 单个培养室详情 -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-700">大棚 #G001 详情</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">正常</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">温度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">22.5°C</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-check-circle"></i></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">湿度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">85%</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-check-circle"></i></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">CO₂浓度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">1100 ppm</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-check-circle"></i></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">光照强度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">600 lux</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-check-circle"></i></span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">生长进度</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">92%</span>
+                                    <span class="ml-2 text-green-500"><i class="fa fa-arrow-up"></i> 今日+3%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">预计收获</span>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">2天后</span>
+                                    <span class="ml-2 text-primary"><i class="fa fa-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <h4 class="font-medium mb-2">实时监控</h4>
+                            <div class="relative rounded-lg overflow-hidden">
+                                <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E8%A7%86%E9%A2%911.jpg" alt="大棚内部实时监控" class="w-full h-auto">
+                                <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                    <button class="bg-white text-primary px-4 py-2 rounded-lg flex items-center">
+                                        <i class="fa fa-play-circle mr-2"></i> 查看直播
+                                    </button>
+                                </div>
+                                <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                                    <i class="fa fa-video-camera mr-1"></i> 实时监控中
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 告警通知区域 -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">智能告警</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    系统实时监测大棚环境参数，发现异常自动预警，保障花菇健康生长和产量稳定。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 已解决告警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-green-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">大棚 #G005 湿度偏低</h3>
+                            <p class="text-sm text-gray-500 mt-1">2025年7月24日 08:15</p>
+                        </div>
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">已解决</span>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-600">
+                        大棚湿度降至65%，低于正常范围。系统已自动启动加湿设备，并通知管理员处理。
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-xs text-gray-500">
+                            <span class="mr-4"><i class="fa fa-tint mr-1"></i> 最低湿度: 65%</span>
+                            <span><i class="fa fa-clock-o mr-1"></i> 持续时间: 18分钟</span>
+                        </div>
+                        <button class="text-primary text-sm hover:underline">查看详情</button>
+                    </div>
+                </div>
+                
+                <!-- 处理中告警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-yellow-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">大棚 #G003 CO₂浓度偏高</h3>
+                            <p class="text-sm text-gray-500 mt-1">2025年7月25日 10:30</p>
+                        </div>
+                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">处理中</span>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-600">
+                        CO₂浓度升至2200ppm，超过正常阈值。系统已启动通风系统，管理员正在检查。
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-xs text-gray-500">
+                            <span class="mr-4"><i class="fa fa-cloud mr-1"></i> 当前浓度: 1950ppm</span>
+                            <span><i class="fa fa-user mr-1"></i> 处理人: 李华</span>
+                        </div>
+                        <button class="text-primary text-sm hover:underline">查看详情</button>
+                    </div>
+                </div>
+                
+                <!-- 未处理告警 -->
+                <div class="bg-white rounded-xl p-6 card-shadow border-l-4 border-red-500">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="font-semibold text-gray-800">大棚 #G012 温度异常</h3>
+                            <p class="text-sm text-gray-500 mt-1">2025年7月25日 14:22</p>
+                        </div>
+                        <span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded-full">未处理</span>
+                    </div>
+                    <p class="mt-3 text-sm text-gray-600">
+                        大棚温度突然升至28°C，超出正常范围。可能影响花菇生长，需紧急处理。
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <div class="text-xs text-gray-500">
+                            <span class="mr-4"><i class="fa fa-thermometer-full mr-1"></i> 当前温度: 28°C</span>
+                            <span><i class="fa fa-bell mr-1"></i> 紧急程度: 高</span>
+                        </div>
+                        <button class="text-primary text-sm hover:underline">查看详情</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-10 text-center">
+                <button class="bg-white hover:bg-gray-50 text-dark border border-gray-200 px-6 py-3 rounded-lg transition-all hover:shadow-lg flex items-center mx-auto">
+                    <i class="fa fa-list mr-2"></i> 查看所有告警记录
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 烘干工艺科普区 - 新增区域 -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">烘干工艺科普区</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    了解花菇脱水的科学原理，探索烘干工艺如何锁住花菇的营养与风味
+                </p>
+            </div>
+            
+            <div class="bg-gray-50 rounded-2xl overflow-hidden card-shadow">
+                <div class="grid grid-cols-1 lg:grid-cols-2">
+                    <div class="p-8 flex flex-col justify-center">
+                        <h3 class="text-2xl font-bold mb-4">花菇脱水原理</h3>
+                        <p class="text-gray-600 mb-6">
+                            花菇烘干是一个复杂的物理过程，通过精确控制温度和湿度，使花菇中的水分缓慢蒸发，
+                            同时保留其营养成分和独特风味。这一过程主要包括预热、恒速干燥和降速干燥三个阶段。
+                        </p>
+                        
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-start">
+                                <div class="mt-1 mr-4 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                    <i class="fa fa-fire"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">热量传递</h4>
+                                    <p class="text-gray-600 text-sm">热空气将热量传递给花菇，使内部水分达到蒸发温度</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="mt-1 mr-4 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                    <i class="fa fa-tint"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">水分蒸发</h4>
+                                    <p class="text-gray-600 text-sm">花菇内部水分转化为水蒸气，扩散到表面并被气流带走</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="mt-1 mr-4 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                    <i class="fa fa-balance-scale"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-800 mb-1">品质保持</h4>
+                                    <p class="text-gray-600 text-sm">精确控制温度和风速，避免营养流失和风味改变</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all hover:shadow-lg self-start">
+                            <i class="fa fa-play-circle mr-2"></i> 观看脱水原理动画
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gray-100 p-8 flex items-center justify-center">
+                        <div class="w-full max-w-md">
+                            <h3 class="text-xl font-bold mb-4 text-center">虚拟烘干房</h3>
+                            <div class="relative rounded-xl overflow-hidden bg-gray-200 aspect-video mb-4 cursor-pointer hover:shadow-lg transition-shadow">
+                                <!-- 这里是虚拟烘干房的展示区域 -->
+                                <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E8%A7%86%E9%A2%912.png" alt="花菇烘干房" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                    <button class="bg-white text-primary px-6 py-3 rounded-full flex items-center">
+                                        <i class="fa fa-play mr-2"></i> 查看实时烘干
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-center text-gray-600 text-sm">
+                                点击上方烘干房，查看花菇在烘干过程中的状态变化
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 菌菇销售区域 - 统一为花菇产品 -->
+    <section id="mushroom-shop" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">新鲜花菇商城</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    品尝来自菇香园的新鲜花菇，全程可控的培养环境，无农药残留，让您吃得安心，吃得健康。
+                </p>
+            </div>
+            
+            <!-- 产品列表 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 产品1 -->
+                <div class="bg-white rounded-xl overflow-hidden card-shadow hover-scale">
+                    <div class="relative">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/200g.jpeg" alt="新鲜花菇" class="w-full h-60 object-cover">
+                        <div class="absolute top-3 right-3 bg-primary text-white text-xs font-bold px-2 py-1 rounded">
+                            热销
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">优质干花菇 200g</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star-half-o"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(215 评价)</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">200g轻量装，把龙潭坝的雾养山泉味装进厨房。秦岭昼夜温差淬炼出的肥厚伞盖，剪开一朵就能炖一锅鲜。零添加烘干锁香，比味精更懂家常小炒。</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">¥38</span>
+                                <span class="text-primary text-2xl font-bold ml-2">¥29.9</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">库存: 356</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg flex-1 flex items-center justify-center">
+                                <i class="fa fa-shopping-cart mr-2"></i> 加入购物车
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 产品2 -->
+                <div class="bg-white rounded-xl overflow-hidden card-shadow hover-scale">
+                    <div class="relative">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/500g.jpeg" alt="干花菇" class="w-full h-60 object-cover">
+                        <div class="absolute top-3 right-3 bg-secondary text-white text-xs font-bold px-2 py-1 rounded">
+                            超值
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">优质干花菇 500g</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star-o"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(178 评价)</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">半公斤足量囤鲜，伞大肉厚、菊花纹清晰，采用先进烘干工艺制作的干花菇，充分保留新鲜花菇的营养和风味，泡发率1:5，炖鸡煮面一次抓一大把，整月鲜味不断档。</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">¥68</span>
+                                <span class="text-primary text-2xl font-bold ml-2">¥55.9</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">库存: 243</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg flex-1 flex items-center justify-center">
+                                <i class="fa fa-shopping-cart mr-2"></i> 加入购物车
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 产品3 -->
+                <div class="bg-white rounded-xl overflow-hidden card-shadow hover-scale">
+                    <div class="relative">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E7%A4%BC%E7%9B%92.jpeg" alt="花菇礼盒" class="w-full h-60 object-cover">
+                        <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                            新品
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">精品干花菇礼盒</h3>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(96 评价)</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">同一批花菇，只取直径4–5 cm的“硬币伞”，人工修柄去杂，颗颗饱满如铜钱。礼盒配秦岭手绘腰封，开盒菌香扑面，送礼即送“秦岭森呼吸”，体面又走心。</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <span class="text-gray-400 line-through text-sm">¥158</span>
+                                <span class="text-primary text-2xl font-bold ml-2">¥128</span>
+                            </div>
+                            <span class="text-gray-500 text-sm">库存: 76</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg transition-all hover:shadow-lg flex-1 flex items-center justify-center">
+                                <i class="fa fa-shopping-cart mr-2"></i> 加入购物车
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-lg transition-all">
+                                <i class="fa fa-heart-o"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 购买表单 -->
+            <div class="mt-16 bg-gray-50 rounded-2xl p-8 max-w-4xl mx-auto">
+                <h3 class="text-2xl font-bold mb-6">立即购买</h3>
+                
+                <form id="purchase-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                            <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的姓名">
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">手机号码</label>
+                            <input type="tel" id="phone" name="phone" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的手机号码">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700 mb-1">收货地址</label>
+                        <input type="text" id="address" name="address" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的详细收货地址">
+                    </div>
+                    
+                    <div>
+                        <label for="product" class="block text-sm font-medium text-gray-700 mb-1">选择产品</label>
+                        <select id="product" name="product" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            <option value="">请选择要购买的产品</option>
+                            <option value="fresh">优质干花菇 250g - ¥29.9</option>
+                            <option value="dried">优质干花菇 500g - ¥55.9</option>
+                            <option value="gift">精品干花菇礼盒 - ¥128</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">购买数量</label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all hover:shadow-lg flex items-center justify-center text-lg font-medium">
+                        <i class="fa fa-check-circle mr-2"></i> 确认购买
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我们 -->
+    <section id="about" class="py-16 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-4">关于菇香园</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    我们致力于通过科技手段培育高品质花菇，打造从培养到销售的全链路数字化管理
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/DJI_0150%20-%20frame%20at%200m4s.jpg" alt="菇香园基地" class="rounded-2xl shadow-xl w-full h-auto">
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-4">科技赋能传统花菇养殖</h3>
+                    <p class="text-gray-600 mb-6">
+                        菇香园花菇养殖基地成立于2018年，占地面积100亩，拥有80个智能控制大棚，
+                        160,000个菌棒，采用数字孪生技术实现全流程智能化管理。我们结合传统培育经验与现代科技，
+                        为花菇生长创造最佳环境，确保产品品质稳定可靠。
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-start">
+                            <div class="mt-1 mr-4 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">全程可控的生长环境</h4>
+                                <p class="text-gray-600 text-sm">精确控制温度、湿度、CO₂浓度和光照，为花菇提供最佳生长条件</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="mt-1 mr-4 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">无农药残留</h4>
+                                <p class="text-gray-600 text-sm">采用物理防治方法，全程不使用农药，确保产品安全健康</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="mt-1 mr-4 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800 mb-1">从产地到餐桌的新鲜保障</h4>
+                                <p class="text-gray-600 text-sm">当天采摘，快速配送，最大限度保留花菇的新鲜度和营养成分</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="#mushroom-shop" class="inline-block bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg transition-all hover:shadow-lg">
+                        了解更多产品
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="https://examplecom.oss-cn-beijing.aliyuncs.com/%E5%A4%B4%E5%83%8F2.png" alt="花菇图标" class="w-10 h-10 rounded-full">
+                        <span class="text-xl font-bold">菌智联 · 龙潭坝</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        科技培育优质花菇，为您的健康生活添彩
+                    </p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa fa-weixin text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa fa-weibo text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa fa-phone text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">快速链接</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#dashboard" class="text-gray-400 hover:text-white transition-colors">监控中心</a></li>
+                        <li><a href="#mushroom-shop" class="text-gray-400 hover:text-white transition-colors">花菇商城</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">关于我们</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">养殖技术</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">常见问题</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">联系我们</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <i class="fa fa-map-marker text-gray-400 mt-1 mr-3"></i>
+                            <span class="text-gray-400">菇香园花菇养殖基地</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-phone text-gray-400 mt-1 mr-3"></i>
+                            <span class="text-gray-400">400-123-4567</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-envelope text-gray-400 mt-1 mr-3"></i>
+                            <span class="text-gray-400">contact@guxiangyuan.com</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">订阅资讯</h4>
+                    <p class="text-gray-400 text-sm mb-4">
+                        订阅我们的资讯，获取最新产品信息和优惠活动
+                    </p>
+                    <div class="flex">
+                        <input type="email" placeholder="您的邮箱地址" class="px-4 py-2 rounded-l-lg w-full focus:outline-none text-dark">
+                        <button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-r-lg transition-colors">
+                            <i class="fa fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-10 pt-6 text-center text-gray-500 text-sm">
+                <p>© 2025 菇香园花菇养殖基地 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu.classList.contains('opacity-0')) {
+                mobileMenu.classList.remove('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            } else {
+                mobileMenu.classList.add('opacity-0', '-translate-y-full', 'pointer-events-none');
+                mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            }
+        });
+        
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('py-2', 'shadow-md');
+                navbar.classList.remove('py-3');
+            } else {
+                navbar.classList.add('py-3');
+                navbar.classList.remove('py-2', 'shadow-md');
+            }
+        });
+        
+        // 图表初始化 - 调整为符合花菇生长特点
+        window.addEventListener('DOMContentLoaded', function() {
+            // 生长趋势图 - 花菇生长周期约30天，前10天缓慢，中期快速，后期趋于平缓
+            const growthCtx = document.getElementById('growth-chart').getContext('2d');
+            new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['7/8', '7/10', '7/12', '7/14', '7/16', '7/18', '7/20', '7/22', '7/24', '7/26', '7/28', '7/30', '8/1', '8/3', '8/5', '8/7', '8/9', '8/11', '8/13', '8/15', '8/17', '8/19', '8/21', '8/23', '8/25', '8/27', '8/29', '8/31', '9/2', '9/4'],
+                    datasets: [{
+                        label: '花菇生长进度 (%)',
+                        data: [5, 8, 12, 15, 18, 22, 28, 35, 42, 48, 55, 60, 65, 70, 74, 78, 82, 85, 87, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // 温度监测图 - 花菇适宜生长温度20-25°C，夜间略低
+            const tempCtx = document.getElementById('temperature-chart').getContext('2d');
+            new Chart(tempCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: '温度 (°C)',
+                        data: [21.5, 21.0, 22.0, 23.5, 24.0, 22.5],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // 湿度监测图 - 花菇适宜生长湿度80-90%
+            const humidityCtx = document.getElementById('humidity-chart').getContext('2d');
+            new Chart(humidityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: '湿度 (%)',
+                        data: [88, 89, 87, 85, 86, 87],
+                        borderColor: '#8D6E63',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // CO2浓度监测图 - 花菇适宜CO2浓度800-1200ppm
+            const co2Ctx = document.getElementById('co2-chart').getContext('2d');
+            new Chart(co2Ctx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: 'CO₂浓度 (ppm)',
+                        data: [1000, 1050, 950, 1100, 1050, 980],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // 光照强度监测图 - 花菇需要适量散射光，避免强光
+            const lightCtx = document.getElementById('light-chart').getContext('2d');
+            new Chart(lightCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: '光照强度 (lux)',
+                        data: [500, 500, 600, 700, 650, 550],
+                        borderColor: '#8D6E63',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+        
+        // 表单提交处理
+        document.getElementById('purchase-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('订单提交成功！我们将尽快为您安排发货。');
+            this.reset();
+        });
+    </script>
+
+</body></html>
