@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* 清除默认边距和 padding */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* 隐藏滚动条 */
+        }
+        
+        /* 视频铺满页面样式 */
+        video {
+            position: fixed; /* 固定定位，相对于视口 */
+            top: 0;
+            left: 0;
+            width: 100vw; /* 100% 视口宽度 */
+            height: 100vh; /* 100% 视口高度 */
+            object-fit: cover; /* 保持比例并覆盖整个容器，可能裁剪部分内容 */
+        }
+    </style>
+</head>
+<body>
+    <video controls autoplay>
+        <source src="https://examplecom.oss-cn-beijing.aliyuncs.com/ZSP.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</body>
+</html>

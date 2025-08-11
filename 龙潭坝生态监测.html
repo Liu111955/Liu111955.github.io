@@ -1,0 +1,1361 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>龙潭坝数字孪生监测系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2E7D32', // 主色调：深绿色
+                        secondary: '#4CAF50', // 中绿色
+                        light: '#A5D6A7', // 浅绿色
+                        danger: '#D32F2F', // 警示红
+                        warning: '#F59E0B', // 警告黄
+                        safe: '#388E3C', // 安全绿
+                        neutral: '#64748B',
+                        background: '#F1F8E9' // 浅绿背景
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .hover-effect {
+                transition: all 0.3s ease;
+            }
+            .hover-effect:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            }
+            .pulse-animation {
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+                }
+                70% {
+                    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+                }
+            }
+            .slide-in {
+                animation: slideIn 0.5s ease forwards;
+            }
+            @keyframes slideIn {
+                from {
+                    transform: translateX(-20px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            .fade-in {
+                animation: fadeIn 0.5s ease forwards;
+            }
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen text-gray-800">
+    <!-- 顶部导航栏 -->
+    <header class="bg-primary shadow-md sticky top-0 z-50 transition-all duration-300">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-primary">
+                        <i class="fa fa-area-chart text-xl"></i>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-bold text-white">龙潭坝生态监测系统</h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-1">
+                    <button id="water-tab" class="nav-tab px-5 py-2 rounded-md bg-white text-primary font-medium">西沟河监测</button>
+                    <button id="land-tab" class="nav-tab px-5 py-2 rounded-md text-white/80 hover:bg-white/10 font-medium transition-colors">山体监测</button>
+                </nav>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 bg-white/10 px-3 py-1.5 rounded-full">
+                        <i class="fa fa-clock-o text-white/80"></i>
+                        <span id="current-time" class="text-sm text-white/80"></span>
+                    </div>
+                    <button class="md:hidden text-white text-xl">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 状态通知栏 -->
+    <div id="alert-bar" class="hidden bg-danger text-white py-2 px-4 text-center text-sm font-medium">
+        <i class="fa fa-exclamation-circle mr-2"></i>
+        <span id="alert-message">紧急预警：西沟河水位超出安全阈值！</span>
+    </div>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 概览统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl p-5 card-shadow hover-effect">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral text-sm mb-1">水体监测点</p>
+                        <h3 class="text-2xl font-bold">3</h3>
+                        <p class="text-safe text-xs mt-2 flex items-center">
+                            <i class="fa fa-check-circle mr-1"></i> 全部在线
+                        </p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-light flex items-center justify-center text-primary">
+                        <i class="fa fa-tint"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-5 card-shadow hover-effect">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral text-sm mb-1">山体传感器</p>
+                        <h3 class="text-2xl font-bold">8</h3>
+                        <p class="text-safe text-xs mt-2 flex items-center">
+                            <i class="fa fa-check-circle mr-1"></i> 全部在线
+                        </p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-light flex items-center justify-center text-primary">
+                        <i class="fa fa-tree"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-5 card-shadow hover-effect">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral text-sm mb-1">今日预警</p>
+                        <h3 class="text-2xl font-bold text-warning">1</h3>
+                        <p class="text-warning text-xs mt-2 flex items-center">
+                            <i class="fa fa-exclamation-triangle mr-1"></i> 需关注
+                        </p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-light flex items-center justify-center text-primary">
+                        <i class="fa fa-bell"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl p-5 card-shadow hover-effect">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral text-sm mb-1">系统状态</p>
+                        <h3 class="text-2xl font-bold">正常</h3>
+                        <p class="text-safe text-xs mt-2 flex items-center">
+                            <i class="fa fa-check-circle mr-1"></i> 运行稳定
+                        </p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-light flex items-center justify-center text-primary">
+                        <i class="fa fa-cog"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 水体监测模块 -->
+        <div id="water-monitor" class="space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary">西沟河上游智能监测</h2>
+                    <p class="text-neutral mt-1">实时监测水质与水文数据，智能预警异常情况</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                    <div class="relative">
+                        <select class="bg-white border border-gray-200 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" id="water-monitor-select">
+                            <option>监测点 1 - 上游源头</option>
+                            <option>监测点 2 - 龙潭中段</option>
+                            <option>监测点 3 - 汇流处</option>
+                        </select>
+                        <i class="fa fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-neutral text-xs"></i>
+                    </div>
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm flex items-center" id="water-refresh-btn">
+                        <i class="fa fa-refresh mr-2"></i> 刷新数据
+                    </button>
+                </div>
+            </div>
+
+            <!-- 监测点状态 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl p-5 card-shadow hover-effect border-l-4 border-safe">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">监测点 1 - 上游源头</h3>
+                            <p class="text-sm text-neutral mt-1">位置：西沟河源头区域</p>
+                            <div class="mt-4 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-safe mr-2"></span>
+                                <span class="text-sm text-safe font-medium">正常运行中</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary">
+                            <i class="fa fa-tint text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 card-shadow hover-effect border-l-4 border-warning">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">监测点 2 - 龙潭中段</h3>
+                            <p class="text-sm text-neutral mt-1">位置：龙潭公园区域</p>
+                            <div class="mt-4 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-warning mr-2"></span>
+                                <span class="text-sm text-warning font-medium">轻度预警</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary">
+                            <i class="fa fa-line-chart text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 card-shadow hover-effect border-l-4 border-safe">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">监测点 3 - 汇流处</h3>
+                            <p class="text-sm text-neutral mt-1">位置：西沟河与支流汇流处</p>
+                            <div class="mt-4 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-safe mr-2"></span>
+                                <span class="text-sm text-safe font-medium">正常运行中</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary">
+                            <i class="fa fa-random text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 水质监测数据 -->
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg text-primary">水质核心指标监测</h3>
+                    <div class="flex space-x-2">
+                        <button class="time-filter px-3 py-1 rounded-md bg-primary text-white text-sm" data-period="24h" data-chart="waterQuality">24小时</button>
+                        <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="7d" data-chart="waterQuality">7天</button>
+                        <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="30d" data-chart="waterQuality">30天</button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-thermometer-half"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">水温</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="water-temperature">18.5°C</h4>
+                                <span class="text-safe text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 0.2°C
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">正常</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-balance-scale"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">pH值</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="water-ph">7.2</h4>
+                                <span class="text-danger text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-down mr-1"></i> 0.1
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">正常</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-tint"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">溶解氧</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="water-oxygen">6.8 mg/L</h4>
+                                <span class="text-safe text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 0.3 mg/L
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">偏低</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="h-80">
+                    <canvas id="waterQualityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 水文监测数据 -->
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg text-primary">水文核心指标监测</h3>
+                    <div class="flex space-x-2">
+                        <button class="time-filter px-3 py-1 rounded-md bg-primary text-white text-sm" data-period="24h" data-chart="hydrology">24小时</button>
+                        <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="7d" data-chart="hydrology">7天</button>
+                        <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="30d" data-chart="hydrology">30天</button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-arrows-v"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">水位</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="water-level">1.28 m</h4>
+                                <span class="text-danger text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 0.12 m
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">警戒</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-exchange"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">流速</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="water-speed">0.8 m/s</h4>
+                                <span class="text-danger text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 0.2 m/s
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">偏高</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-filter"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">浊度</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="water-turbidity">12 NTU</h4>
+                                <span class="text-danger text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 3 NTU
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded-full">超标</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="h-80">
+                    <canvas id="hydrologyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 预警记录 -->
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <h3 class="font-bold text-lg text-primary mb-6">预警记录</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">时间</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">监测点</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">指标</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">预警类型</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">状态</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">2025-08-11 09:23</td>
+                                <td class="px-4 py-3 text-sm">监测点 2 - 龙潭中段</td>
+                                <td class="px-4 py-3 text-sm">浊度</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-danger/10 text-danger text-xs rounded-full">超标</span></td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">处理中</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">2025-06-14 16:45</td>
+                                <td class="px-4 py-3 text-sm">监测点 2 - 龙潭中段</td>
+                                <td class="px-4 py-3 text-sm">水位</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">警戒</span></td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">已解决</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">2024-08-12 11:10</td>
+                                <td class="px-4 py-3 text-sm">监测点 3 - 汇流处</td>
+                                <td class="px-4 py-3 text-sm">溶解氧</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">偏低</span></td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">已解决</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 山体监测模块 (默认隐藏) -->
+        <div id="land-monitor" class="space-y-8 hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-primary">山体地质灾害监测</h2>
+                    <p class="text-neutral mt-1">实时监测易滑坡区域，智能预警地质灾害风险</p>
+                </div>
+                <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                    <div class="relative">
+                        <select class="bg-white border border-gray-200 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" id="land-monitor-select">
+                            <option>区域 A - 西坡区域</option>
+                            <option>区域 B - 北坡区域</option>
+                            <option>区域 C - 东沟区域</option>
+                        </select>
+                        <i class="fa fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-neutral text-xs"></i>
+                    </div>
+                    <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm flex items-center" id="land-refresh-btn">
+                        <i class="fa fa-refresh mr-2"></i> 刷新数据
+                    </button>
+                </div>
+            </div>
+
+            <!-- 监测区域状态 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl p-5 card-shadow hover-effect border-l-4 border-safe">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">区域 A - 西坡区域</h3>
+                            <p class="text-sm text-neutral mt-1">3个传感器监测中</p>
+                            <div class="mt-4 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-safe mr-2"></span>
+                                <span class="text-sm text-safe font-medium">低风险</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary">
+                            <i class="fa fa-tree text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 card-shadow hover-effect border-l-4 border-warning">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">区域 B - 北坡区域</h3>
+                            <p class="text-sm text-neutral mt-1">3个传感器监测中</p>
+                            <div class="mt-4 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-warning mr-2"></span>
+                                <span class="text-sm text-warning font-medium">中风险</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary">
+                            <i class="fa fa-area-chart text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-5 card-shadow hover-effect border-l-4 border-safe">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold">区域 C - 东沟区域</h3>
+                            <p class="text-sm text-neutral mt-1">2个传感器监测中</p>
+                            <div class="mt-4 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-safe mr-2"></span>
+                                <span class="text-sm text-safe font-medium">低风险</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary">
+                            <i class="fa fa-mountain text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 山体监测数据 -->
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg text-primary">山体状态核心指标</h3>
+                    <div class="flex space-x-2">
+                        <button class="time-filter px-3 py-1 rounded-md bg-primary text-white text-sm" data-period="24h" data-chart="landslide">24小时</button>
+                        <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="7d" data-chart="landslide">7天</button>
+                        <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="30d" data-chart="landslide">30天</button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-arrows-alt"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">山体位移</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="land-displacement">3.2 mm</h4>
+                                <span class="text-danger text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 0.5 mm
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">关注</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-tint"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">土壤含水率</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="land-moisture">28%</h4>
+                                <span class="text-danger text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 4%
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">偏高</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-thermometer-half"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">土壤温度</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="land-temperature">16.8°C</h4>
+                                <span class="text-safe text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-arrow-up mr-1"></i> 0.3°C
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">正常</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 border border-gray-100 rounded-lg">
+                        <div class="w-12 h-12 rounded-full bg-light flex items-center justify-center text-primary mr-4">
+                            <i class="fa fa-exclamation-circle"></i>
+                        </div>
+                        <div>
+                            <p class="text-neutral text-sm">裂缝变化</p>
+                            <div class="flex items-end">
+                                <h4 class="text-2xl font-bold" id="land-crack">0.8 mm</h4>
+                                <span class="text-safe text-xs ml-2 mb-1 flex items-center">
+                                    <i class="fa fa-minus mr-1"></i> 0 mm
+                                </span>
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">稳定</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="h-80">
+                    <canvas id="landslideChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 风险评估与预警 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <h3 class="font-bold text-lg text-primary mb-6">地质灾害风险评估</h3>
+                    <div class="flex justify-between items-center mb-6">
+                        <div></div>
+                        <div class="flex space-x-2">
+                            <button class="time-filter px-3 py-1 rounded-md bg-primary text-white text-sm" data-period="24h" data-chart="riskAssessment">24小时</button>
+                            <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="7d" data-chart="riskAssessment">7天</button>
+                            <button class="time-filter px-3 py-1 rounded-md text-gray-600 hover:bg-gray-100 text-sm" data-period="30d" data-chart="riskAssessment">30天</button>
+                        </div>
+                    </div>
+                    <div class="h-72">
+                        <canvas id="riskAssessmentChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <h3 class="font-bold text-lg text-primary mb-6">预警系统与应对措施</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="p-4 border border-warning/30 bg-warning/5 rounded-lg">
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning mr-4 mt-0.5 flex-shrink-0">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-warning">中风险预警</h4>
+                                    <p class="text-sm text-gray-600 mt-1">北坡区域土壤含水率持续上升，未来24小时可能出现小型滑坡。</p>
+                                    <div class="mt-3 flex flex-wrap gap-2">
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">加强监测频率</span>
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">准备应急物资</span>
+                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">巡查人员到位</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 border border-gray-100 rounded-lg">
+                            <h4 class="font-medium mb-3 text-primary">预警响应流程</h4>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 rounded-full bg-light flex items-center justify-center text-primary text-xs mr-3 mt-0.5 flex-shrink-0">1</div>
+                                    <p class="text-sm text-gray-600">传感器检测到异常数据，系统自动分析风险等级</p>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 rounded-full bg-light flex items-center justify-center text-primary text-xs mr-3 mt-0.5 flex-shrink-0">2</div>
+                                    <p class="text-sm text-gray-600">达到预警阈值时，系统自动推送预警信息至相关负责人</p>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 rounded-full bg-light flex items-center justify-center text-primary text-xs mr-3 mt-0.5 flex-shrink-0">3</div>
+                                    <p class="text-sm text-gray-600">根据风险等级启动相应应急响应措施</p>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="w-6 h-6 rounded-full bg-light flex items-center justify-center text-primary text-xs mr-3 mt-0.5 flex-shrink-0">4</div>
+                                    <p class="text-sm text-gray-600">险情解除后，系统记录并分析此次事件数据</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 传感器分布与状态 -->
+            <div class="bg-white rounded-xl p-6 card-shadow">
+                <h3 class="font-bold text-lg text-primary mb-6">传感器分布与状态</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">传感器ID</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">所在区域</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">监测类型</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">最后更新</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral uppercase tracking-wider">状态</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">SNS-001</td>
+                                <td class="px-4 py-3 text-sm">区域 A - 西坡</td>
+                                <td class="px-4 py-3 text-sm">山体位移</td>
+                                <td class="px-4 py-3 text-sm">10分钟前</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">正常</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">SNS-002</td>
+                                <td class="px-4 py-3 text-sm">区域 A - 西坡</td>
+                                <td class="px-4 py-3 text-sm">土壤含水率</td>
+                                <td class="px-4 py-3 text-sm">8分钟前</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">正常</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">SNS-003</td>
+                                <td class="px-4 py-3 text-sm">区域 A - 西坡</td>
+                                <td class="px-4 py-3 text-sm">裂缝监测</td>
+                                <td class="px-4 py-3 text-sm">12分钟前</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-safe/10 text-safe text-xs rounded-full">正常</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">SNS-004</td>
+                                <td class="px-4 py-3 text-sm">区域 B - 北坡</td>
+                                <td class="px-4 py-3 text-sm">山体位移</td>
+                                <td class="px-4 py-3 text-sm">5分钟前</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">关注</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-sm">SNS-005</td>
+                                <td class="px-4 py-3 text-sm">区域 B - 北坡</td>
+                                <td class="px-4 py-3 text-sm">土壤含水率</td>
+                                <td class="px-4 py-3 text-sm">7分钟前</td>
+                                <td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-warning/10 text-warning text-xs rounded-full">偏高</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                    <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-primary">
+                        <i class="fa fa-area-chart"></i>
+                    </div>
+                    <p class="text-sm text-white/80">龙潭坝生态监测系统 © 2025</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-white/80 hover:text-white transition-colors">
+                        <i class="fa fa-question-circle"></i>
+                        <span class="ml-1 text-sm">帮助中心</span>
+                    </a>
+                    <a href="#" class="text-white/80 hover:text-white transition-colors">
+                        <i class="fa fa-file-text-o"></i>
+                        <span class="ml-1 text-sm">系统文档</span>
+                    </a>
+                    <a href="#" class="text-white/80 hover:text-white transition-colors">
+                        <i class="fa fa-envelope-o"></i>
+                        <span class="ml-1 text-sm">联系我们</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 预警弹窗 (默认隐藏) -->
+    <div id="alert-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4 slide-in">
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-danger/10 flex items-center justify-center text-danger mr-3 pulse-animation">
+                        <i class="fa fa-exclamation-circle"></i>
+                    </div>
+                    <h3 class="font-bold text-lg">紧急预警</h3>
+                </div>
+                <button id="close-alert" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <p class="text-gray-600 mb-6">龙潭中段（监测点2）浊度已达25 NTU，超出安全阈值，可能存在污染风险，请立即处理！</p>
+            <div class="flex space-x-3">
+                <button class="flex-1 bg-danger text-white py-2 rounded-lg text-sm font-medium">
+                    查看详情并处理
+                </button>
+                <button class="px-4 bg-gray-100 text-gray-700 py-2 rounded-lg text-sm font-medium" id="dismiss-alert">
+                    稍后处理
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 存储不同时间周期的图表数据
+        const chartData = {
+            // 水质监测图表数据
+            waterQuality: {
+                '24h': {
+                    labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+                    datasets: [
+                        {
+                            label: 'pH值',
+                            data: [7.3, 7.3, 7.2, 7.2, 7.1, 7.2, 7.2, 7.2],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '溶解氧(mg/L)',
+                            data: [7.1, 7.0, 6.9, 6.8, 6.7, 6.8, 6.8, 6.8],
+                            borderColor: '#4CAF50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                '7d': {
+                    labels: ['7/9', '7/10', '7/11', '7/12', '7/13', '7/14', '7/15'],
+                    datasets: [
+                        {
+                            label: 'pH值',
+                            data: [7.5, 7.4, 7.3, 7.3, 7.2, 7.2, 7.2],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '溶解氧(mg/L)',
+                            data: [7.5, 7.3, 7.2, 7.0, 6.9, 6.8, 6.8],
+                            borderColor: '#4CAF50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                '30d': {
+                    labels: ['6/15', '6/20', '6/25', '7/1', '7/5', '7/10', '7/15'],
+                    datasets: [
+                        {
+                            label: 'pH值',
+                            data: [7.6, 7.5, 7.5, 7.4, 7.4, 7.3, 7.2],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '溶解氧(mg/L)',
+                            data: [8.0, 7.8, 7.6, 7.5, 7.3, 7.0, 6.8],
+                            borderColor: '#4CAF50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                }
+            },
+            
+            // 水文监测图表数据
+            hydrology: {
+                '24h': {
+                    labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+                    datasets: [
+                        {
+                            label: '水位(m)',
+                            data: [1.05, 1.07, 1.09, 1.12, 1.15, 1.20, 1.25, 1.28],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '浊度(NTU)',
+                            data: [5, 6, 7, 8, 10, 15, 20, 25],
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                '7d': {
+                    labels: ['7/9', '7/10', '7/11', '7/12', '7/13', '7/14', '7/15'],
+                    datasets: [
+                        {
+                            label: '水位(m)',
+                            data: [0.95, 0.98, 1.0, 1.05, 1.1, 1.18, 1.28],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '浊度(NTU)',
+                            data: [4, 5, 6, 7, 9, 15, 25],
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                '30d': {
+                    labels: ['6/15', '6/20', '6/25', '7/1', '7/5', '7/10', '7/15'],
+                    datasets: [
+                        {
+                            label: '水位(m)',
+                            data: [0.8, 0.82, 0.85, 0.9, 0.92, 0.98, 1.28],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '浊度(NTU)',
+                            data: [3, 4, 5, 5, 6, 10, 25],
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                }
+            },
+            
+            // 山体滑坡监测图表数据
+            landslide: {
+                '24h': {
+                    labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+                    datasets: [
+                        {
+                            label: '山体位移(mm)',
+                            data: [2.1, 2.2, 2.3, 2.5, 2.7, 2.9, 3.1, 3.2],
+                            borderColor: '#D32F2F',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '土壤含水率(%)',
+                            data: [18, 20, 21, 23, 24, 25, 27, 28],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                '7d': {
+                    labels: ['7/9', '7/10', '7/11', '7/12', '7/13', '7/14', '7/15'],
+                    datasets: [
+                        {
+                            label: '山体位移(mm)',
+                            data: [1.5, 1.7, 1.9, 2.2, 2.5, 3.0, 3.2],
+                            borderColor: '#D32F2F',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '土壤含水率(%)',
+                            data: [15, 17, 19, 22, 24, 26, 28],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                '30d': {
+                    labels: ['6/15', '6/20', '6/25', '7/1', '7/5', '7/10', '7/15'],
+                    datasets: [
+                        {
+                            label: '山体位移(mm)',
+                            data: [0.8, 1.0, 1.2, 1.4, 1.8, 2.5, 3.2],
+                            borderColor: '#D32F2F',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '土壤含水率(%)',
+                            data: [12, 14, 16, 18, 20, 24, 28],
+                            borderColor: '#2E7D32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                }
+            },
+            
+            // 风险评估图表数据
+            riskAssessment: {
+                '24h': {
+                    labels: ['山体位移', '土壤含水率', '坡度', '植被覆盖率', '历史灾害频率', '近期降雨量'],
+                    datasets: [
+                        {
+                            label: '当前风险值',
+                            data: [65, 70, 50, 40, 60, 75],
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            borderColor: '#EF4444',
+                            pointBackgroundColor: '#EF4444',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#EF4444'
+                        },
+                        {
+                            label: '安全阈值',
+                            data: [50, 50, 60, 70, 50, 50],
+                            backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                            borderColor: '#2E7D32',
+                            pointBackgroundColor: '#2E7D32',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#2E7D32',
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                '7d': {
+                    labels: ['山体位移', '土壤含水率', '坡度', '植被覆盖率', '历史灾害频率', '近期降雨量'],
+                    datasets: [
+                        {
+                            label: '当前风险值',
+                            data: [55, 60, 50, 40, 60, 65],
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            borderColor: '#EF4444',
+                            pointBackgroundColor: '#EF4444',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#EF4444'
+                        },
+                        {
+                            label: '安全阈值',
+                            data: [50, 50, 60, 70, 50, 50],
+                            backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                            borderColor: '#2E7D32',
+                            pointBackgroundColor: '#2E7D32',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#2E7D32',
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                '30d': {
+                    labels: ['山体位移', '土壤含水率', '坡度', '植被覆盖率', '历史灾害频率', '近期降雨量'],
+                    datasets: [
+                        {
+                            label: '当前风险值',
+                            data: [45, 50, 50, 40, 60, 55],
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            borderColor: '#EF4444',
+                            pointBackgroundColor: '#EF4444',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#EF4444'
+                        },
+                        {
+                            label: '安全阈值',
+                            data: [50, 50, 60, 70, 50, 50],
+                            backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                            borderColor: '#2E7D32',
+                            pointBackgroundColor: '#2E7D32',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#2E7D32',
+                            borderDash: [5, 5]
+                        }
+                    ]
+                }
+            }
+        };
+
+        // 存储图表实例
+        const charts = {};
+
+        // 初始化所有图表
+        function initCharts() {
+            // 水质监测图表
+            const waterQualityCtx = document.getElementById('waterQualityChart').getContext('2d');
+            charts.waterQuality = new Chart(waterQualityCtx, {
+                type: 'line',
+                data: chartData.waterQuality['24h'],
+                options: getLineChartOptions('pH值', '溶解氧(mg/L)', 6.5, 8.5, 5, 10)
+            });
+
+            // 水文监测图表
+            const hydrologyCtx = document.getElementById('hydrologyChart').getContext('2d');
+            charts.hydrology = new Chart(hydrologyCtx, {
+                type: 'line',
+                data: chartData.hydrology['24h'],
+                options: getLineChartOptions('水位(m)', '浊度(NTU)', 0.8, 1.5, 0, 30)
+            });
+
+            // 山体滑坡监测图表
+            const landslideCtx = document.getElementById('landslideChart').getContext('2d');
+            charts.landslide = new Chart(landslideCtx, {
+                type: 'line',
+                data: chartData.landslide['24h'],
+                options: getLineChartOptions('山体位移(mm)', '土壤含水率(%)', 0, 5, 0, 40)
+            });
+
+            // 风险评估图表
+            const riskAssessmentCtx = document.getElementById('riskAssessmentChart').getContext('2d');
+            charts.riskAssessment = new Chart(riskAssessmentCtx, {
+                type: 'radar',
+                data: chartData.riskAssessment['24h'],
+                options: getRadarChartOptions()
+            });
+        }
+
+        // 获取线图配置
+        function getLineChartOptions(yLabel, y1Label, yMin, yMax, y1Min, y1Max) {
+            return {
+                responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: yLabel
+                        },
+                        min: yMin,
+                        max: yMax,
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: y1Label
+                        },
+                        min: y1Min,
+                        max: y1Max,
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        usePointStyle: true
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                }
+            };
+        }
+
+        // 获取雷达图配置
+        function getRadarChartOptions() {
+            return {
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                }
+            };
+        }
+
+        // 切换图表时间周期
+        function switchChartPeriod(chartId, period) {
+            if (charts[chartId] && chartData[chartId] && chartData[chartId][period]) {
+                // 添加淡入淡出动画效果
+                const canvas = document.getElementById(chartId + 'Chart');
+                canvas.classList.add('opacity-0');
+                
+                setTimeout(() => {
+                    charts[chartId].data = chartData[chartId][period];
+                    charts[chartId].update();
+                    canvas.classList.remove('opacity-0');
+                    canvas.classList.add('fade-in');
+                }, 300);
+                
+                // 更新对应的数据卡片显示
+                updateDataCards(chartId, period);
+            }
+        }
+
+        // 更新数据卡片显示
+        function updateDataCards(chartId, period) {
+            // 根据图表类型和时间段更新数据卡片
+            if (chartId === 'waterQuality') {
+                const phValue = chartData.waterQuality[period].datasets[0].data[chartData.waterQuality[period].datasets[0].data.length - 1];
+                const oxygenValue = chartData.waterQuality[period].datasets[1].data[chartData.waterQuality[period].datasets[1].data.length - 1];
+                
+                document.getElementById('water-ph').textContent = phValue;
+                document.getElementById('water-oxygen').textContent = oxygenValue + ' mg/L';
+            } else if (chartId === 'hydrology') {
+                const levelValue = chartData.hydrology[period].datasets[0].data[chartData.hydrology[period].datasets[0].data.length - 1];
+                const turbidityValue = chartData.hydrology[period].datasets[1].data[chartData.hydrology[period].datasets[1].data.length - 1];
+                
+                document.getElementById('water-level').textContent = levelValue + ' m';
+                document.getElementById('water-turbidity').textContent = turbidityValue + ' NTU';
+            } else if (chartId === 'landslide') {
+                const displacementValue = chartData.landslide[period].datasets[0].data[chartData.landslide[period].datasets[0].data.length - 1];
+                const moistureValue = chartData.landslide[period].datasets[1].data[chartData.landslide[period].datasets[1].data.length - 1];
+                
+                document.getElementById('land-displacement').textContent = displacementValue + ' mm';
+                document.getElementById('land-moisture').textContent = moistureValue + '%';
+            }
+        }
+
+        // 更新当前时间
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeString;
+        }
+        
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 切换监测模块
+        document.getElementById('water-tab').addEventListener('click', function() {
+            document.getElementById('water-monitor').classList.remove('hidden');
+            document.getElementById('land-monitor').classList.add('hidden');
+            
+            // 更新导航样式
+            document.getElementById('water-tab').classList.add('bg-white', 'text-primary');
+            document.getElementById('water-tab').classList.remove('text-white/80', 'hover:bg-white/10');
+            
+            document.getElementById('land-tab').classList.remove('bg-white', 'text-primary');
+            document.getElementById('land-tab').classList.add('text-white/80', 'hover:bg-white/10');
+        });
+        
+        document.getElementById('land-tab').addEventListener('click', function() {
+            document.getElementById('land-monitor').classList.remove('hidden');
+            document.getElementById('water-monitor').classList.add('hidden');
+            
+            // 更新导航样式
+            document.getElementById('land-tab').classList.add('bg-white', 'text-primary');
+            document.getElementById('land-tab').classList.remove('text-white/80', 'hover:bg-white/10');
+            
+            document.getElementById('water-tab').classList.remove('bg-white', 'text-primary');
+            document.getElementById('water-tab').classList.add('text-white/80', 'hover:bg-white/10');
+        });
+
+        // 时间筛选按钮点击事件
+        document.querySelectorAll('.time-filter').forEach(button => {
+            button.addEventListener('click', function() {
+                const period = this.getAttribute('data-period');
+                const chartId = this.getAttribute('data-chart');
+                
+                // 更新按钮样式
+                const parentGroup = this.parentElement;
+                parentGroup.querySelectorAll('.time-filter').forEach(btn => {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+                });
+                
+                this.classList.add('bg-primary', 'text-white');
+                this.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                
+                // 切换图表数据
+                switchChartPeriod(chartId, period);
+            });
+        });
+
+        // 刷新按钮点击事件
+        document.getElementById('water-refresh-btn').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            icon.classList.add('fa-spin');
+            
+            // 模拟数据刷新
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+                // 可以在这里添加实际的数据刷新逻辑
+            }, 1000);
+        });
+
+        document.getElementById('land-refresh-btn').addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            icon.classList.add('fa-spin');
+            
+            // 模拟数据刷新
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+                // 可以在这里添加实际的数据刷新逻辑
+            }, 1000);
+        });
+
+        // 监测点选择事件
+        document.getElementById('water-monitor-select').addEventListener('change', function() {
+            // 可以在这里添加切换监测点的逻辑
+        });
+
+        document.getElementById('land-monitor-select').addEventListener('change', function() {
+            // 可以在这里添加切换监测区域的逻辑
+        });
+
+        // 预警弹窗控制
+        setTimeout(function() {
+            document.getElementById('alert-bar').classList.remove('hidden');
+            setTimeout(function() {
+                document.getElementById('alert-modal').classList.remove('hidden');
+            }, 2000);
+        }, 5000);
+        
+        document.getElementById('close-alert').addEventListener('click', function() {
+            document.getElementById('alert-modal').classList.add('hidden');
+        });
+        
+        document.getElementById('dismiss-alert').addEventListener('click', function() {
+            document.getElementById('alert-modal').classList.add('hidden');
+        });
+
+        // 页面加载完成后初始化图表
+        window.addEventListener('load', initCharts);
+    </script>
+
+
+</body></html>
